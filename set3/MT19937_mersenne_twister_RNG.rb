@@ -1,19 +1,19 @@
 
-
+# we'll have to go ahead and AND every result with 0xFFFFFFFF to make this a somewhat standard 32 bit implementation
 
 class MT19937 #32-bit implementation
 
-
   def initialize(seed)
     @wordsize = 32
+    @wordsize_mask = (1<<@wordsize)-1 # == 0xFFFFFFFF
     @state_size = 624
     @state = []
     @lower_mask = (1<<(@wordsize-1))-1 # binary: r * 1 (sequence)
-    @higher_mask =  (~@lower_mask)&((1<<@wordsize)-1) # negate lower_mask, take lower 32 (wordsize) bits
+    @higher_mask =  ((~@lower_mask)&((1<<@wordsize)-1))&@wordsize_mask # negate lower_mask, take lower 32 (wordsize) bits
     @index = @state_size
     @state.push(seed)
     (1...@state_size).each do |i|
-      @state.push((1812433253 * (@state[i-1]^(@state[i-1] >> (@wordsize-2))) + i))
+      @state.push((1812433253 * (@state[i-1]^(@state[i-1] >> (@wordsize-2))) + i) & @wordsize_mask)
     end
   end
   def number
@@ -27,10 +27,9 @@ class MT19937 #32-bit implementation
     y = y ^ ((y >> 11) & 0xFFFFFFFF)
     y = y ^ ((y << 7) & 0x9D2C5680)
     y = y ^ ((y << 15) & 0xEFC60000)
-    y = y ^ (y >> 43)
+    y = y ^ (y >> 18)
     @index+=1
-    y = (y & ((1<<@wordsize)-1))
-    return y #lower @wordsize bits of the derived y
+    return y
   end
   def change_state
     (0...@state_size).each do |i|

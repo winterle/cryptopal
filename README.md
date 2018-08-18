@@ -1,4 +1,5 @@
-My attempt at the cryptopal challenges: https://cryptopals.com/
+**My attempt at the cryptopal challenges: https://cryptopals.com/**
+
 This is my first time writing ruby code, so it's defenitely not written
 in a clean style or efficiently in any way.
 Credit to technion, who completed all of the challenges in ruby,
