@@ -10,17 +10,18 @@ end
 
 module MT19937_clone
 
-def self.untemper(rng_output)
-  #puts "bitsize is #{rng_output.bit_length}"
+def self.untemper(rng_output) #reverse the temper function
   x = rng_output
   x = x ^ (x>>18)
   x = x ^ (( x << 15) & 0xEFC60000)
-  (0..(rng_output.bit_length/7)+2).each do
+  #have to repeat it a few times since only those 7 bit of the original value are still there, so we first have to restore the second 7 bits and so on up to 32 bits
+  (0..6).each do
     x = x ^ ((x << 7)& 0x9D2C5680)
   end
-  (0..(rng_output.bit_length/11)+4).each do
+  (0..6).each do
     x = x ^ (x >> 11)
   end
+  #puts "#{x}\nbitsize is #{rng_output.bit_length}\n"
   return x
 end
 #returns a new instance of the MT19937 class that produces the same sequence
@@ -52,6 +53,9 @@ cloned = clone(rng)
     end
   end
   puts "success!"
+  (0...10).each do
+    puts "predicted:\n#{cloned.number}\nactual:\n#{rng.number}\n----\n"
+  end
 
 
 end
