@@ -12,7 +12,7 @@ module CTR
     (0...plain.size).each do |i|
       if i%16==0
         keystr = keystream(key,nonce)
-        nonce[8] = (nonce[8].ord + 1).chr
+        nonce[8] = ((nonce[8].ord + 1)%256).chr
       end
       cipher << (plain[i].ord^keystr[i%16].ord).chr
     end
