@@ -3,8 +3,8 @@ require "#{File.dirname(__FILE__ )}/cbc.rb"
 require "#{File.dirname(__FILE__ )}/padding_validation.rb"
 
 module Bitflip
-  $key = (0x00).chr * 16#OpenSSL::Random.random_bytes(16)
-  $iv = (0x00).chr * 16#OpenSSL::Random.random_bytes(16)
+  $key = OpenSSL::Random.random_bytes(16)
+  $iv = OpenSSL::Random.random_bytes(16)
 
   def Bitflip.encrypt(plain)
     plain.gsub!(/[;=]/,'') #remove control characters
@@ -56,4 +56,4 @@ module Bitflip
 
 end
 #run
-#Bitflip.modify
+Bitflip.modify

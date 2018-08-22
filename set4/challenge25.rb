@@ -54,7 +54,5 @@ module RA_RW_AES_CTR #random access read write
     #run
      puts RA_RW_AES_CTR.break(cipher)
 
-
-
 end
 
