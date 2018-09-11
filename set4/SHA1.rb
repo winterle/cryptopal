@@ -71,6 +71,7 @@ module SHA1
 
         fill   = "\x00"*(64 - (message.length+9)%64)
         length = "\x00" * 4 + [message.length*8].pack("N*")
+        length.force_encoding("UTF-8")
         words = (message + "\x80" + fill + length).unpack("N*")
 
         chain = IV
