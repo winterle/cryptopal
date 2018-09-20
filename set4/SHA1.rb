@@ -10,10 +10,9 @@ module SHA1
         0xFFFFFFFF & (((word) << (bits)) | ((word) >> (32-(bits))))
     end
 
-    def SHA1.compress(words, chain)
+    def SHA1.compress(words, chain)  #modified to be able to pass the constants
 
         constants = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6]
-
         16.upto(79) do |t|
             words[t] = circular_shift(1,words[t-3] ^ words[t-8] ^ words[t-14] ^ words[t-16])
         end
@@ -67,18 +66,28 @@ module SHA1
                 0xFFFFFFFF & (chain[4] + ee)]
     end
 
-    def SHA1.hexdigest(message)
+    def SHA1.hexdigest(message, chain = IV)#accepts custom IVs
 
         fill   = "\x00"*(64 - (message.length+9)%64)
         length = "\x00" * 4 + [message.length*8].pack("N*")
         length.force_encoding("UTF-8")
         words = (message + "\x80" + fill + length).unpack("N*")
-
-        chain = IV
         0.upto(words.length/16-1) do |t|
             chain = compress(words[t*16,16],chain)
         end
 
         chain.map{|c| "%08x"%c}.join("")
     end
+
+    #does not append any new padding, can pass custom IV
+    def self.hexdigest_nopadding(message, chain = IV)
+        words = (message ).unpack("N*")
+        0.upto(words.length/16-1) do |t|
+            chain = compress(words[t*16,16],chain)
+        end
+        chain.map{|c| "%08x"%c}.join("")
+    end
+
+
+
 end
