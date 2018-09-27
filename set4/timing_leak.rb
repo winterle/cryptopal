@@ -1,20 +1,21 @@
 require 'net/http'
 require 'open-uri'
 module Timing
-
-    url_stub = URI.parse("http://127.0.0.1/test?file=testfile&signature=80b662265c03454ec90a8e40599c6a01b768dff9")
+    # fire up server.rb to run this
     # puma listening on port 4567
-    # sinatra has some pretty interesting lag spikes, this has become rather complex
     def self.exploit(filename)
         uri_stub = "http://127.0.0.1/test?"
         done = false
         byte = 0
         digest_len = 20
-        timeout_len = 0.02 #s
+        timeout_len = 0.005 #s
         #start persistent connection
+        total_start = Time.now
         url = URI(uri_stub + "file=#{filename}&signature=stub")
         Net::HTTP.start(url.host,4567) do |http|
             sig_known = ""
+            written = false
+            puts "breaking signature..."
             while !done
                 #forge new request
                 hex_byte = byte.to_s(16)
@@ -33,16 +34,14 @@ module Timing
                 ret = http.request request
                 time_end = Time.now
                 time_total = time_end - time_start
-                puts "query: file=#{filename}&signature=#{sig_known}#{hex_byte}#{'0'*fill}"
-                #puts "response time: #{time_total}"
-
-                #increment byte
-                if byte == 0xFF
-                    raise "failed, correct byte could not be found"
+                if !written
+                    print "#{sig_known}#{hex_byte}#{'0'*fill}"+"\r"
+                    $stdout.flush
+                    written=true
                 end
                 if (len = time_total-((sig_known.length/2) * timeout_len)) > timeout_len
                     if len > timeout_len * 1.5
-                        #puts "Unexpected Latency Hit, reset"
+                        #Unexpected Latency Hit, reset
                         next
                     else #try this byte a few times to be absolutely sure it produces the correct timeout, take arithmetic mean
                         mean = 0
@@ -77,20 +76,27 @@ module Timing
                     sig_known<<hex_byte
                     byte = 0
                 end
+                if byte == 0xFF
+                    raise "failed, correct byte could not be found"
+                end
                 # we're done
                 if sig_known.length == digest_len*2
                     done = true
+                    total_end = Time.now
                     puts "found signature: #{sig_known}"
+                    puts "total time run: #{total_end-total_start} seconds"
+                    puts "timeout length per byte was #{timeout_len*1000}ms"
+                    puts "----server response----"
                     puts "status code: HTTP #{ret.code} #{ret.message}"
+                    puts "body:"
                     puts ret.body
                 end
+                #increment byte
                 byte+=1
+                written = false
             end
         end
     end
-
-
-
-    self.exploit("testfile")
-
 end
+#run
+Timing.exploit("testfile")
