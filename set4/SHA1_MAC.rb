@@ -39,9 +39,8 @@ module SHA1_MAC
     end
 
     def self.run
-        mac = SHA1_MAC.keyed_mac("secretkey","comment1=cooking
-        %20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon")
-        puts "mac is: "
+        mac = SHA1_MAC.keyed_mac("secretkey",message = "comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon")
+        puts "mac (#{message}): "
         puts mac
         puts "forged mac (of message = key||actual message||glue-padding||additional message||padding) is:"
         registers = SHA1_MAC.split_registers(mac)
@@ -50,7 +49,8 @@ module SHA1_MAC
     end
 
 end
-
+#run this
+SHA1_MAC.run
 
 
 
