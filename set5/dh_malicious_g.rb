@@ -54,7 +54,6 @@ if g == p
 end
 if g == p-1
     # since g = p-1, the echo-bot's public key will be: ((p-1)**priv)%p = p-1 || 1 , so the clients session key will be ((p-1 || 1)**priv)%p = p-1 || 1 (where || is either or)
-    # fixme sometimes bad decrypt
     dh_mitm.set_session(p-1)
     print "mitm read:\n"
     begin
