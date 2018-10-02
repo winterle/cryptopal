@@ -31,24 +31,23 @@ class RSA
         plain = modexp(int,@d,@n)
         return int_to_str(plain)
     end
-
-
-    def modexp(base,exp,mod)
-        return 0 if mod == 1
-        res = 1
-        base = base%mod
-        while exp > 0
-            if exp%2==1
-                res = (res * base)%mod
-            end
-            exp = exp >>1
-            base = (base*base)%mod
-        end
-        return res
-    end
-
 end
 
+
+
+def modexp(base,exp,mod)
+    return 0 if mod == 1
+    res = 1
+    base = base%mod
+    while exp > 0
+        if exp%2==1
+            res = (res * base)%mod
+        end
+        exp = exp >>1
+        base = (base*base)%mod
+    end
+    return res
+end
 
 def int_to_str(int)
     str = ''
@@ -87,18 +86,21 @@ def nthroot(n, a, precision = 1e-1024)
     end while (prev - x).abs > precision
     x
 end
-x = RSA.new
-cipher = []
-keys=[]
-(0...3).each do
-    x.keygen
-    keys.push(x.get_pub[1])
-    cipher.push(x.encrypt('verysecretstring'))
+def run_broadcast
+    x = RSA.new
+    cipher = []
+    keys=[]
+    (0...3).each do
+        x.keygen
+        keys.push(x.get_pub[1])
+        cipher.push(x.encrypt('verysecretstring'))
+    end
+    res = ((cipher[0]*(ms0 = (keys[1]*keys[2])) * invmod(ms0,keys[0])) +
+         (cipher[1]*(ms1 = (keys[0]*keys[2])) * invmod(ms1,keys[1])) +
+        (cipher[2]*(ms2 = (keys[0]*keys[1])) * invmod(ms2,keys[2])) ) % (keys[0] * keys[1] * keys[2])
+    res = nthroot(3,res.to_i)
+    puts int_to_str(res)
 end
-res = ((cipher[0]*(ms0 = (keys[1]*keys[2])) * invmod(ms0,keys[0])) +
-     (cipher[1]*(ms1 = (keys[0]*keys[2])) * invmod(ms1,keys[1])) +
-    (cipher[2]*(ms2 = (keys[0]*keys[1])) * invmod(ms2,keys[2])) ) % (keys[0] * keys[1] * keys[2])
-res = nthroot(3,res.to_i)
-puts int_to_str(res)
-
+#uncomment to run
+#run_broadcast
 
